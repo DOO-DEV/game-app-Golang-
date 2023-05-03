@@ -14,7 +14,9 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health-check", healthCheck)
 	mux.HandleFunc("/users/register", userRegisterHandler)
-	log.Println(http.ListenAndServe(":8080", mux))
+	log.Println("server is listening on port 8080")
+	server := http.Server{Addr: ":8080", Handler: mux}
+	log.Println(server.ListenAndServe())
 }
 
 func healthCheck(w http.ResponseWriter, req *http.Request) {
