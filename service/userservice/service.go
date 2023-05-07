@@ -11,9 +11,17 @@ import (
 type Repository interface {
 	IsPhoneNumberUnique(phoneNumber string) (bool, error)
 	Register(u entity.User) (entity.User, error)
+	GetUserByPhoneNumber(phoneNumber string) (entity.User, bool, error)
+	GetUserByID(userID uint) (entity.User, error)
+}
+
+type AuthGenerator interface {
+	CreateAccessToken(user entity.User) (string, error)
+	CreateRefreshToken(user entity.User) (string, error)
 }
 
 type Service struct {
+	auth AuthGenerator
 	repo Repository
 }
 
@@ -24,7 +32,11 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	User entity.User
+	User struct {
+		ID          uint   `json:"id"`
+		Name        string `json:"name"`
+		PhoneNumber string `json:"phone_number"`
+	} `json:"user"`
 }
 
 type LoginRequest struct {
@@ -33,10 +45,20 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
-func New(repo Repository) Service {
-	return Service{repo: repo}
+type ProfileRequest struct {
+	UserID uint `json:"id"`
+}
+
+type ProfileResponse struct {
+	Name string `json:"name"`
+}
+
+func New(auth AuthGenerator, repo Repository) Service {
+	return Service{repo: repo, auth: auth}
 }
 
 func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
@@ -82,19 +104,56 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 		return RegisterResponse{}, fmt.Errorf("unexpected error: %w", err)
 	}
 
-	return RegisterResponse{User: createdUser}, nil
+	var resp RegisterResponse
+	resp.User.ID = createdUser.ID
+	resp.User.Name = createdUser.Name
+	resp.User.PhoneNumber = createdUser.PhoneNumber
+	return resp, nil
 
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
-	// check existence of phone number in repository
+	// TODO - it would be better to user separate method for existence check and getUserByPhoneNumber
+	user, exist, err := s.repo.GetUserByPhoneNumber(req.PhoneNumber)
+	if err != nil {
+		return LoginResponse{}, fmt.Errorf("unexpected error: %w", err)
+	}
 
-	// get user by phone number
+	if !exist {
+		return LoginResponse{}, fmt.Errorf("username or password isn't correct")
+	}
 
 	// compare user.Password with req.Password
+	if user.Password != getMd5Hash(req.Password) {
+		return LoginResponse{}, fmt.Errorf("username or password isn't correct")
+	}
 
-	return LoginResponse{}, nil
+	accessToken, err := s.auth.CreateAccessToken(user)
+	if err != nil {
+		return LoginResponse{}, fmt.Errorf("unexpected error")
+	}
 
+	refreshToken, err := s.auth.CreateRefreshToken(user)
+	if err != nil {
+		return LoginResponse{}, fmt.Errorf("unexpected error")
+	}
+
+	return LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+
+}
+
+// all request inputs for intractor/service should be sanitizing
+
+func (s Service) GetProfile(req ProfileRequest) (ProfileResponse, error) {
+	// get user by id
+	user, err := s.repo.GetUserByID(req.UserID)
+	if err != nil {
+		// I don'  expected the repository call return "record not found" error,
+		//because I assume the interactor input is sanitized
+		// TODO - we can use rich error
+		return ProfileResponse{}, fmt.Errorf("unexpected error: %w", err)
+	}
+	return ProfileResponse{Name: user.Name}, nil
 }
 
 func getMd5Hash(text string) string {

@@ -1,58 +1,50 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"game-app/config"
+	"game-app/delivery/httpserver"
 	"game-app/repository/mysql"
+	"game-app/service/authservice"
 	"game-app/service/userservice"
-	"io"
-	"log"
-	"net/http"
+	"time"
+)
+
+const (
+	JwtSignKey            = "jwt_secret"
+	AccessSubject         = "at"
+	RefreshSubject        = "rt"
+	AccessExpirationTime  = time.Hour * 24
+	RefreshExpirationTime = time.Hour * 24 * 7
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health-check", healthCheck)
-	mux.HandleFunc("/users/register", userRegisterHandler)
-	log.Println("server is listening on port 8080")
-	server := http.Server{Addr: ":8080", Handler: mux}
-	log.Println(server.ListenAndServe())
+	cfg := config.Config{
+		Auth: authservice.Config{
+			SignKey:               JwtSignKey,
+			AccessExpirationTime:  AccessExpirationTime,
+			RefreshExpirationTime: RefreshExpirationTime,
+			AccessSubject:         AccessSubject,
+			RefreshSubject:        RefreshSubject,
+		},
+		HTTPServer: config.HTTPServer{Port: 8080},
+		MySql: mysql.Config{
+			Username: "gameapp",
+			Password: "gameappt0lk2o20",
+			Port:     3308,
+			Host:     "localhost",
+			DBName:   "gameapp_db",
+		},
+	}
+	authSvc, userSvc := setupServices(cfg)
+	server := httpserver.New(cfg, authSvc, userSvc)
+
+	server.Serve()
 }
 
-func healthCheck(w http.ResponseWriter, req *http.Request) {
-	w.Write([]byte(`{"message": "server is running in port 8080"}`))
-}
+func setupServices(cfg config.Config) (authservice.Service, userservice.Service) {
+	authSvc := authservice.New(cfg.Auth)
+	MysqlRepo := mysql.New(cfg.MySql)
+	userSvc := userservice.New(authSvc, MysqlRepo)
 
-func userRegisterHandler(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		fmt.Fprint(w, `{"message": "invalid method"}`)
-
-		return
-	}
-
-	data, err := io.ReadAll(req.Body)
-	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, err.Error())))
-
-		return
-	}
-
-	var registerReq userservice.RegisterRequest
-	err = json.Unmarshal(data, &registerReq)
-	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, err.Error())))
-
-		return
-	}
-
-	mysqlRepo := mysql.New()
-	userSvc := userservice.New(mysqlRepo)
-	_, err = userSvc.Register(registerReq)
-	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, err.Error())))
-
-		return
-	}
-
-	w.Write([]byte(`{"message": "user created"}`))
+	return authSvc, userSvc
 }

@@ -1,0 +1,72 @@
+package authservice
+
+import (
+	"fmt"
+	"game-app/entity"
+	"github.com/golang-jwt/jwt/v4"
+	"strings"
+	"time"
+)
+
+type Config struct {
+	SignKey               string
+	AccessExpirationTime  time.Duration
+	RefreshExpirationTime time.Duration
+	AccessSubject         string
+	RefreshSubject        string
+}
+
+type Service struct {
+	config Config
+}
+
+func New(cfg Config) Service {
+	return Service{
+		config: cfg,
+	}
+}
+
+func (s Service) CreateAccessToken(user entity.User) (string, error) {
+	return s.createToken(user.ID, s.config.AccessSubject, s.config.AccessExpirationTime)
+}
+
+func (s Service) CreateRefreshToken(user entity.User) (string, error) {
+	return s.createToken(user.ID, s.config.RefreshSubject, s.config.RefreshExpirationTime)
+}
+
+func (s Service) ParseToken(bearerToken string) (*Claims, error) {
+	tokenStr := strings.Replace(bearerToken, "Bearer ", "", 1)
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(s.config.SignKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		fmt.Printf("UserID: %d, ExpiresAt: %v\n", claims.UserID, claims.RegisteredClaims.ExpiresAt)
+
+		return claims, nil
+	} else {
+		return nil, err
+	}
+}
+
+func (s Service) createToken(userID uint, subject string, expDuration time.Duration) (string, error) {
+	claims := &Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   subject,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expDuration)),
+		},
+		UserID: userID,
+	}
+	// crate a signer for hs256
+	// TODO - replace rs256 with rs256
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := accessToken.SignedString([]byte(s.config.SignKey))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
