@@ -31,3 +31,18 @@ func (s Server) userLogin(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, res)
 }
+
+func (s Server) userProfile(c echo.Context) error {
+	authToken := c.Request().Header.Get("Authorization")
+	claims, err := s.authSvc.ParseToken(authToken)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
+
+	resp, err := s.userSvc.GetProfile(userservice.ProfileRequest{UserID: claims.UserID})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, resp)
+}

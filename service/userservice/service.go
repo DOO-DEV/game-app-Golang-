@@ -44,9 +44,19 @@ type LoginRequest struct {
 	Password    string `json:"password"`
 }
 
-type LoginResponse struct {
+type Tokens struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
+}
+
+type UserInfo struct {
+	ID          uint   `json:"id"`
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+}
+type LoginResponse struct {
+	User   UserInfo `json:"user"`
+	Tokens Tokens   `json:"tokens"`
 }
 
 type ProfileRequest struct {
@@ -138,7 +148,14 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, fmt.Errorf("unexpected error")
 	}
 
-	return LoginResponse{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+	return LoginResponse{Tokens: Tokens{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, User: UserInfo{
+		ID:          user.ID,
+		Name:        user.Name,
+		PhoneNumber: user.PhoneNumber,
+	}}, nil
 
 }
 
