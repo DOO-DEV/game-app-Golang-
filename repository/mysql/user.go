@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"game-app/entity"
+	"game-app/pkg/errmsg"
+	"game-app/pkg/richerror"
 	"time"
 )
 
@@ -41,22 +43,26 @@ func (d MysqlDb) GetUserByPhoneNumber(phoneNumber string) (entity.User, bool, er
 			return entity.User{}, false, nil
 		}
 
-		return entity.User{}, false, fmt.Errorf("cant scan query result: %w", err)
+		return entity.User{}, false, richerror.New("mysql.GetUserByPhoneNumber")
 	}
 
 	return user, true, nil
 }
 
 func (d MysqlDb) GetUserByID(userID uint) (entity.User, error) {
+	const op = "mysql.GetUserByID"
+
 	row := d.db.QueryRow(`select * from users where id = ?`, userID)
 	// TODO - use a function for scan user
 	user, err := scanUser(row)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return entity.User{}, nil
+			return entity.User{}, richerror.New(op).WithErr(err).WithMessage(errmsg.ErrorMsgNotFound).
+				WithKind(richerror.KindNotFound)
 		}
 
-		return entity.User{}, fmt.Errorf("cant scan query result: %w", err)
+		return entity.User{}, richerror.New(op).WithErr(err).WithMessage(errmsg.ErrorMsgCantQueryResult).
+			WithKind(richerror.KindUnexpected)
 	}
 
 	return user, nil

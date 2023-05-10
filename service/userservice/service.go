@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"game-app/entity"
 	"game-app/pkg/phonenumber"
+	"game-app/pkg/richerror"
 )
 
 type Repository interface {
@@ -123,10 +124,12 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
+	const op = "userservice.Login"
+
 	// TODO - it would be better to user separate method for existence check and getUserByPhoneNumber
 	user, exist, err := s.repo.GetUserByPhoneNumber(req.PhoneNumber)
 	if err != nil {
-		return LoginResponse{}, fmt.Errorf("unexpected error: %w", err)
+		return LoginResponse{}, richerror.New(op).WithErr(err).WithMeta(map[string]interface{}{"phone_number": req.PhoneNumber})
 	}
 
 	if !exist {
@@ -162,13 +165,15 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 // all request inputs for intractor/service should be sanitizing
 
 func (s Service) GetProfile(req ProfileRequest) (ProfileResponse, error) {
+	const op = "userservice.Profile"
+
 	// get user by id
 	user, err := s.repo.GetUserByID(req.UserID)
 	if err != nil {
 		// I don'  expected the repository call return "record not found" error,
 		//because I assume the interactor input is sanitized
 		// TODO - we can use rich error
-		return ProfileResponse{}, fmt.Errorf("unexpected error: %w", err)
+		return ProfileResponse{}, richerror.New(op).WithErr(err).WithMeta(map[string]interface{}{"req": req})
 	}
 	return ProfileResponse{Name: user.Name}, nil
 }
