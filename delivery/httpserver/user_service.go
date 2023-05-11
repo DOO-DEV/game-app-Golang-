@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"game-app/dto"
 	"game-app/pkg/errmsg/httpmsg"
 	"game-app/service/userservice"
 	"github.com/labstack/echo/v4"
@@ -8,10 +9,21 @@ import (
 )
 
 func (s Server) userRegister(c echo.Context) error {
-	var req userservice.RegisterRequest
+	// TODO - we should verify by phone number by verification code
+
+	var req dto.RegisterRequest
 	if err := c.Bind(&req); err != nil {
 		return echo.ErrBadRequest
 	}
+
+	if fieldErrors, err := s.userValidator.ValidateRegisterRequest(req); err != nil {
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"errors":  fieldErrors,
+			"message": msg,
+		})
+	}
+
 	res, err := s.userSvc.Register(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

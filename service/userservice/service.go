@@ -4,8 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"game-app/dto"
 	"game-app/entity"
-	"game-app/pkg/phonenumber"
 	"game-app/pkg/richerror"
 )
 
@@ -26,20 +26,6 @@ type Service struct {
 	repo Repository
 }
 
-type RegisterRequest struct {
-	PhoneNumber string `json:"phone_number"`
-	Name        string `json:"name"`
-	Password    string `json:"password"`
-}
-
-type RegisterResponse struct {
-	User struct {
-		ID          uint   `json:"id"`
-		Name        string `json:"name"`
-		PhoneNumber string `json:"phone_number"`
-	} `json:"user"`
-}
-
 type LoginRequest struct {
 	PhoneNumber string `json:"phone_number"`
 	Password    string `json:"password"`
@@ -50,14 +36,9 @@ type Tokens struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-type UserInfo struct {
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	PhoneNumber string `json:"phone_number"`
-}
 type LoginResponse struct {
-	User   UserInfo `json:"user"`
-	Tokens Tokens   `json:"tokens"`
+	User   dto.UserInfo `json:"user"`
+	Tokens Tokens       `json:"tokens"`
 }
 
 type ProfileRequest struct {
@@ -72,34 +53,7 @@ func New(auth AuthGenerator, repo Repository) Service {
 	return Service{repo: repo, auth: auth}
 }
 
-func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
-	// TODO - we should verify by phone number by verification code
-
-	// validate phone number
-	if !phonenumber.IsValid(req.PhoneNumber) {
-		return RegisterResponse{}, fmt.Errorf("phone number is valid")
-	}
-
-	// TODO - check the password with regex
-	// validate password
-	if len(req.Password) < 8 {
-		return RegisterResponse{}, fmt.Errorf("password length must be grater than 8")
-	}
-
-	// check uniqueness of phone number
-	if isUnique, err := s.repo.IsPhoneNumberUnique(req.PhoneNumber); !isUnique || err != nil {
-		if err != nil {
-			return RegisterResponse{}, fmt.Errorf("unexpected error: %w", err)
-		}
-		if !isUnique {
-			return RegisterResponse{}, fmt.Errorf("phone number is not unique")
-		}
-	}
-
-	// validate name
-	if len(req.Name) < 3 {
-		return RegisterResponse{}, fmt.Errorf("name must more than 3 chars")
-	}
+func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
 
 	// create new user
 	user := entity.User{
@@ -112,10 +66,10 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	createdUser, err := s.repo.Register(user)
 	if err != nil {
-		return RegisterResponse{}, fmt.Errorf("unexpected error: %w", err)
+		return dto.RegisterResponse{}, fmt.Errorf("unexpected error: %w", err)
 	}
 
-	var resp RegisterResponse
+	var resp dto.RegisterResponse
 	resp.User.ID = createdUser.ID
 	resp.User.Name = createdUser.Name
 	resp.User.PhoneNumber = createdUser.PhoneNumber
@@ -154,7 +108,7 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	return LoginResponse{Tokens: Tokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-	}, User: UserInfo{
+	}, User: dto.UserInfo{
 		ID:          user.ID,
 		Name:        user.Name,
 		PhoneNumber: user.PhoneNumber,
