@@ -1,19 +1,20 @@
 package userhandler
 
 import (
+	"game-app/pkg/constant"
 	"game-app/pkg/errmsg/httpmsg"
+	"game-app/service/authservice"
 	"game-app/service/userservice"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
+func getClaims(c echo.Context) *authservice.Claims {
+	return c.Get(constant.AuthMiddlewareContextKey).(*authservice.Claims)
+}
+
 func (h Handler) userProfile(c echo.Context) error {
-	authToken := c.Request().Header.Get("Authorization")
-	claims, err := h.authSvc.ParseToken(authToken)
-	if err != nil {
-		msg, code := httpmsg.Error(err)
-		return echo.NewHTTPError(code, msg)
-	}
+	claims := getClaims(c)
 
 	resp, err := h.userSvc.GetProfile(userservice.ProfileRequest{UserID: claims.UserID})
 	if err != nil {
