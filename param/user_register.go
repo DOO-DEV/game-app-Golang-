@@ -1,4 +1,4 @@
-package dto
+package param
 
 type RegisterRequest struct {
 	PhoneNumber string `json:"phone_number"`
