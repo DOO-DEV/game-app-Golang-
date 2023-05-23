@@ -8,11 +8,11 @@ import (
 )
 
 type Config struct {
-	SignKey               string
-	AccessExpirationTime  time.Duration
-	RefreshExpirationTime time.Duration
-	AccessSubject         string
-	RefreshSubject        string
+	SignKey               string        `koanf:"sign_key"`
+	AccessExpirationTime  time.Duration `koanf:"access_expiration_time"`
+	RefreshExpirationTime time.Duration `koanf:"refresh_expiration_time"`
+	AccessSubject         string        `koanf:"access_subject"`
+	RefreshSubject        string        `koanf:"refresh_subject"`
 }
 
 type Service struct {
@@ -45,7 +45,7 @@ func (s Service) ParseToken(bearerToken string) (*Claims, error) {
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return claims, nil
 	}
-	
+
 	return nil, err
 }
 
