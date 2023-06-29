@@ -27,7 +27,7 @@ func New() Config {
 	k := koanf.New(".")
 
 	// load default configuration from default function
-	if err := k.Load(structs.Provider(Default(), ""), nil); err != nil {
+	if err := k.Load(structs.Provider(Default(), "koanf"), nil); err != nil {
 		log.Fatalf("error loading default: %s", err)
 	}
 
@@ -46,7 +46,7 @@ func New() Config {
 		log.Fatalf("error unmarshaling config: %s", err)
 	}
 
-	fmt.Printf("%+v", instance)
+	fmt.Printf("%+v\n", instance)
 
 	return instance
 }

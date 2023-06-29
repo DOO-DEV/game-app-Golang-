@@ -26,11 +26,11 @@ func New(cfg Config) Service {
 }
 
 func (s Service) CreateAccessToken(user entity.User) (string, error) {
-	return s.createToken(user.ID, s.config.AccessSubject, s.config.AccessExpirationTime)
+	return s.createToken(user.ID, user.Role, s.config.AccessSubject, s.config.AccessExpirationTime)
 }
 
 func (s Service) CreateRefreshToken(user entity.User) (string, error) {
-	return s.createToken(user.ID, s.config.RefreshSubject, s.config.RefreshExpirationTime)
+	return s.createToken(user.ID, user.Role, s.config.RefreshSubject, s.config.RefreshExpirationTime)
 }
 
 func (s Service) ParseToken(bearerToken string) (*Claims, error) {
@@ -49,13 +49,14 @@ func (s Service) ParseToken(bearerToken string) (*Claims, error) {
 	return nil, err
 }
 
-func (s Service) createToken(userID uint, subject string, expDuration time.Duration) (string, error) {
+func (s Service) createToken(userID uint, role entity.Role, subject string, expDuration time.Duration) (string, error) {
 	claims := &Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   subject,
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expDuration)),
 		},
 		UserID: userID,
+		Role:   role,
 	}
 	// crate a signer for hs256
 	// TODO - replace rs256 with rs256

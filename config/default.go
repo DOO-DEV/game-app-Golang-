@@ -1,7 +1,6 @@
 package config
 
 import (
-	"game-app/repository/mysql"
 	"game-app/service/authservice"
 	"time"
 )
@@ -16,7 +15,5 @@ func Default() Config {
 			AccessExpirationTime:  time.Hour * 24,
 			RefreshExpirationTime: time.Hour * 24 * 7,
 		},
-		HTTPServer: HTTPServer{},
-		MySql:      mysql.Config{},
 	}
 }

@@ -1,7 +1,5 @@
 type:
   yml
-auth:
-  sign_key: hello
 
 http_server:
   port: 8080
