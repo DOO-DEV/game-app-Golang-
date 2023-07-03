@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"game-app/adapter/redis"
 	"game-app/config"
 	"game-app/delivery/httpserver"
@@ -9,6 +10,7 @@ import (
 	"game-app/repository/mysql/access_control"
 	mysqluser "game-app/repository/mysql/user"
 	"game-app/repository/redis/matchign"
+	"game-app/scheduler"
 	"game-app/service/authorizationservice"
 	"game-app/service/authservice"
 	"game-app/service/backoffice_user_service"
@@ -16,6 +18,9 @@ import (
 	"game-app/service/userservice"
 	"game-app/service/validator/matchingvalidator"
 	"game-app/service/validator/uservalidator"
+	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
@@ -28,9 +33,25 @@ func main() {
 
 	// TODO - add struct and add these returned items as struct fields
 	authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc, matchingSvc, matchingValidator := setupServices(cfg)
-	server := httpserver.New(cfg, authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc, matchingSvc, matchingValidator)
 
-	server.Serve()
+	done := make(chan bool)
+	go func() {
+		sch := scheduler.New()
+		sch.Start(done)
+	}()
+
+	go func() {
+		server := httpserver.New(cfg, authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc, matchingSvc, matchingValidator)
+		server.Serve()
+	}()
+
+	quit := make(chan os.Signal, 1)
+
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	fmt.Println("received interrupt signal, shutting down gracefully...")
+	done <- true
+	time.Sleep(time.Second * 5)
 }
 
 func setupServices(cfg config.Config) (authservice.Service,
