@@ -13,7 +13,7 @@ type Config struct {
 }
 
 type Adapter struct {
-	Client *redis.Client
+	client *redis.Client
 }
 
 func New(config Config) Adapter {
@@ -22,5 +22,9 @@ func New(config Config) Adapter {
 		Password: config.Password,
 		DB:       config.DB,
 	})
-	return Adapter{Client: rdb}
+	return Adapter{client: rdb}
+}
+
+func (a Adapter) Client() *redis.Client {
+	return a.client
 }
