@@ -10,6 +10,7 @@ import (
 	"game-app/service/authservice"
 	"game-app/service/backoffice_user_service"
 	"game-app/service/matchingservice"
+	"game-app/service/presenceservice"
 	"game-app/service/userservice"
 	"game-app/service/validator/matchingvalidator"
 	"game-app/service/validator/uservalidator"
@@ -18,6 +19,7 @@ import (
 )
 
 type Server struct {
+	Router                *echo.Echo
 	config                config.Config
 	userHandler           userhandler.Handler
 	backofficeUserHandler backoffice_user_handler.Handler
@@ -32,26 +34,28 @@ func New(config config.Config,
 	authorizationSvc authorizationservice.Service,
 	matchingSvc matchingservice.Service,
 	matchingValidator matchingvalidator.Validator,
+	presenceSvc presenceservice.Service,
 ) Server {
 	return Server{
+		Router:                echo.New(),
 		config:                config,
-		userHandler:           userhandler.New(config.Auth, authSvc, userSvc, userValidator),
+		userHandler:           userhandler.New(config.Auth, authSvc, userSvc, userValidator, presenceSvc),
 		backofficeUserHandler: backoffice_user_handler.New(config.Auth, authSvc, backofficeUserSvc, authorizationSvc),
-		matchingHandler:       matchinghandler.New(config.Auth, authSvc, matchingSvc, matchingValidator),
+		matchingHandler:       matchinghandler.New(config.Auth, authSvc, matchingSvc, matchingValidator, presenceSvc),
 	}
 }
 
 func (s Server) Serve() {
-	e := echo.New()
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	s.Router.Use(middleware.Logger())
+	s.Router.Use(middleware.Recover())
 
-	e.GET("/health-check", s.healthCheck)
+	s.Router.GET("/health-check", s.healthCheck)
 
-	s.userHandler.SetRoutes(e)
-	s.backofficeUserHandler.SetRoutes(e)
-	s.matchingHandler.SetRoutes(e)
+	s.userHandler.SetRoutes(s.Router)
+	s.backofficeUserHandler.SetRoutes(s.Router)
+	s.matchingHandler.SetRoutes(s.Router)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HTTPServer.Port)))
+	s.Router.Logger.Fatal(s.Router.Start(fmt.Sprintf(":%d", s.config.HTTPServer.Port)))
+
 }

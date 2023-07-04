@@ -19,3 +19,10 @@ redis:
   host: localhost
   db: 0
   password:
+
+presence_service:
+  expiration_time: "60m"
+  prefix: "presence"
+
+scheduler:
+  match_waited_users_interval_in_seconds: "30"

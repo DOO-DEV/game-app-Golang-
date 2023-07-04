@@ -3,19 +3,29 @@ package config
 import (
 	"game-app/adapter/redis"
 	"game-app/repository/mysql"
+	"game-app/scheduler"
 	"game-app/service/authservice"
 	"game-app/service/matchingservice"
+	"game-app/service/presenceservice"
+	"time"
 )
 
 type Config struct {
+	Application     Application            `koanf:"application"`
 	Auth            authservice.Config     `koanf:"auth"`
 	HTTPServer      HTTPServer             `koanf:"http_server"`
 	MySql           mysql.Config           `koanf:"mysql"`
 	MatchingService matchingservice.Config `koanf:"matching_service"`
 	Redis           redis.Config           `koanf:"redis"`
+	PresenceService presenceservice.Config `koanf:"presence_service"`
+	Scheduler       scheduler.Config       `koanf:"scheduler"`
 	Debug           bool                   `koanf:"debug"`
 }
 
 type HTTPServer struct {
 	Port int `koanf:"port"`
+}
+
+type Application struct {
+	GracefullShutDownTimeout time.Duration `koanf:"gracefull_shut_down_timeout"`
 }

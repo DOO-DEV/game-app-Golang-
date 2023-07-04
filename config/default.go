@@ -15,6 +15,6 @@ func Default() Config {
 			AccessExpirationTime:  time.Hour * 24,
 			RefreshExpirationTime: time.Hour * 24 * 7,
 		},
-		//MatchingService: matchingservice.Config{WaitingTimeout: time.Minute * 2},
+		Application: Application{GracefullShutDownTimeout: time.Second * 5},
 	}
 }
