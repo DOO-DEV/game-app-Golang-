@@ -1,0 +1,27 @@
+package presence
+
+import (
+	"context"
+	"game-app/contract/golang/presence"
+	"game-app/param"
+	"game-app/pkg/protobufmapper"
+	"game-app/pkg/slice"
+	"google.golang.org/grpc"
+)
+
+type Client struct {
+	client presence.PresenceServiceClient
+}
+
+func New(conn *grpc.ClientConn) Client {
+	return Client{client: presence.NewPresenceServiceClient(conn)}
+}
+
+func (c Client) GetPresence(ctx context.Context, req param.GetPresenceRequest) (param.GetPresenceResponse, error) {
+	res, err := c.client.GetPresence(ctx, &presence.GetPresenceRequest{UserIds: slice.MapFromUintToUint64(req.UserIDs)})
+	if err != nil {
+		return param.GetPresenceResponse{}, err
+	}
+
+	return protobufmapper.MapGetPresenceResponseFromProtoBuf(res), nil
+}
