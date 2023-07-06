@@ -7,6 +7,7 @@ import (
 	"game-app/pkg/richerror"
 	"game-app/pkg/timestamp"
 	"github.com/redis/go-redis/v9"
+	"log"
 	"strconv"
 	"time"
 )
@@ -66,4 +67,24 @@ func (d DB) GetWaitingListByCategory(ctx context.Context, category entity.Catego
 
 func getCategoryKey(category entity.Category) string {
 	return fmt.Sprintf("%s:%s", WaitingListPrefix, category)
+}
+
+func (d DB) RemoveFromWaitingList(category entity.Category, userIDs []uint) {
+	// TODO - add 5 to config
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	members := make([]any, 0)
+	for _, u := range userIDs {
+		members = append(members, strconv.Itoa(int(u)))
+	}
+
+	numOfRemovedMembers, err := d.adapter.Client().ZRem(ctx, getCategoryKey(category), members).Result()
+
+	if err != nil {
+		fmt.Errorf("remove from waiting list %\n", err)
+		// TODO - update metrics
+	}
+
+	log.Printf("%d items removed from %s", numOfRemovedMembers, category)
 }
