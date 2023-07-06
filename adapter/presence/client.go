@@ -17,11 +17,15 @@ func New(conn *grpc.ClientConn) Client {
 	return Client{client: presence.NewPresenceServiceClient(conn)}
 }
 
-func (c Client) GetPresence(ctx context.Context, req param.GetPresenceRequest) (param.GetPresenceResponse, error) {
-	res, err := c.client.GetPresence(ctx, &presence.GetPresenceRequest{UserIds: slice.MapFromUintToUint64(req.UserIDs)})
+func (c Client) GetPresence(ctx context.Context, request param.GetPresenceRequest) (param.GetPresenceResponse, error) {
+
+	resp, err := c.client.GetPresence(ctx,
+		&presence.GetPresenceRequest{
+			UserIds: slice.MapFromUintToUint64(request.UserIDs),
+		})
 	if err != nil {
 		return param.GetPresenceResponse{}, err
 	}
 
-	return protobufmapper.MapGetPresenceResponseFromProtoBuf(res), nil
+	return protobufmapper.MapGetPresenceResponseFromProtobuf(resp), nil
 }

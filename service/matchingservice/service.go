@@ -7,6 +7,7 @@ import (
 	"game-app/param"
 	"game-app/pkg/richerror"
 	"game-app/pkg/timestamp"
+	"github.com/labstack/gommon/log"
 	"github.com/thoas/go-funk"
 	"sync"
 	"time"
@@ -74,15 +75,20 @@ func (s Service) match(ctx context.Context, category entity.Category, wg *sync.W
 		return
 	}
 
-	userIDs := make([]uint, len(list))
+	userIDs := make([]uint, 0)
 	for _, u := range list {
 		userIDs = append(userIDs, u.UserID)
+	}
+
+	if len(userIDs) < 2 {
+		return
 	}
 
 	presenceList, err := s.presenceClient.GetPresence(ctx, param.GetPresenceRequest{UserIDs: userIDs})
 	if err != nil {
 		// TODO - log error
 		// TODO - update metric
+		log.Errorf("presenceClient.GetPresence Error: %v\n", err)
 		return
 	}
 

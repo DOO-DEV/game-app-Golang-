@@ -37,8 +37,15 @@ func main() {
 	mgr := migrator.New(cfg.MySql)
 	mgr.Up()
 
+	presenceGrpcConn, err := grpc.Dial(":8086", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer presenceGrpcConn.Close()
+
 	// TODO - add struct and add these returned items as struct fields
-	authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc, matchingSvc, matchingValidator, presenceSvc := setupServices(cfg)
+	authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc,
+		matchingSvc, matchingValidator, presenceSvc := setupServices(cfg, presenceGrpcConn)
 
 	done := make(chan bool)
 	var wg sync.WaitGroup
@@ -75,7 +82,7 @@ func main() {
 	wg.Wait()
 }
 
-func setupServices(cfg config.Config) (
+func setupServices(cfg config.Config, presenceGrpcConn *grpc.ClientConn) (
 	authservice.Service,
 	userservice.Service,
 	uservalidator.Validator,
@@ -102,13 +109,7 @@ func setupServices(cfg config.Config) (
 	presenceRpo := redispresence.New(redisAdapter)
 	presenceSvc := presenceservice.New(presenceRpo, cfg.PresenceService)
 
-	conn, err := grpc.Dial(":8086", grpc.WithInsecure())
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
-
-	presenceAdaptor := presenceClient.New(conn)
+	presenceAdaptor := presenceClient.New(presenceGrpcConn)
 	matchingSvc := matchingservice.New(matchingRepo, cfg.MatchingService, presenceAdaptor)
 
 	matchingValidator := matchingvalidator.New()

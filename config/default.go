@@ -7,7 +7,7 @@ import (
 
 func Default() Config {
 	return Config{
-		Debug: true,
+		Debug: false,
 		Auth: authservice.Config{
 			SignKey:               "jwt_secret",
 			AccessSubject:         "at",

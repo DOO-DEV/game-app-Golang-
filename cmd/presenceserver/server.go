@@ -9,10 +9,13 @@ import (
 )
 
 func main() {
+	// TODO - read config path from command line
 	cfg := config.New()
+
 	redisAdapter := redis.New(cfg.Redis)
-	presenceRpo := redispresence.New(redisAdapter)
-	presenceSvc := presenceservice.New(presenceRpo, cfg.PresenceService)
+
+	presenceRepo := redispresence.New(redisAdapter)
+	presenceSvc := presenceservice.New(presenceRepo, cfg.PresenceService)
 
 	server := presenceserver.New(presenceSvc)
 	server.Start()

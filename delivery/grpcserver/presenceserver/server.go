@@ -8,9 +8,10 @@ import (
 	"game-app/pkg/protobufmapper"
 	"game-app/pkg/slice"
 	"game-app/service/presenceservice"
-	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	"google.golang.org/grpc"
 )
 
 type Server struct {
@@ -20,18 +21,21 @@ type Server struct {
 
 func New(svc presenceservice.Service) Server {
 	return Server{
+		UnimplementedPresenceServiceServer: presence.UnimplementedPresenceServiceServer{},
 		svc:                                svc,
-		UnimplementedPresenceServiceServer: presence.UnimplementedPresenceServiceServer{}}
+	}
 }
 
 func (s Server) GetPresence(ctx context.Context, req *presence.GetPresenceRequest) (*presence.GetPresenceResponse, error) {
+	resp, err := s.svc.GetPresence(ctx, param.GetPresenceRequest{
+		UserIDs: slice.MapFromUint64ToUint(req.GetUserIds()),
+	})
 
-	res, err := s.svc.GetPresence(ctx, param.GetPresenceRequest{UserIDs: slice.MapFromUint64ToUint(req.GetUserIds())})
 	if err != nil {
 		return nil, err
 	}
 
-	return protobufmapper.MapGetPresenceResponseToProtoBuf(res), nil
+	return protobufmapper.MapGetPresenceResponseToProtobuf(resp), nil
 }
 
 func (s Server) Start() {
@@ -42,17 +46,20 @@ func (s Server) Start() {
 		panic(err)
 	}
 
-	// proto buf presence server
+	// pbPresenceserver
+
 	presenceSvcServer := Server{}
 
 	// grpc server
 	grpcServer := grpc.NewServer()
+	// pbPresenceserver register into grpc server
 
-	// proto buf presence server register into grpc server
 	presence.RegisterPresenceServiceServer(grpcServer, &presenceSvcServer)
-	// serve grpc server by listener
+	// server grpcServer by listener
+
 	log.Println("presence grpc server starting on", address)
 	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatal("couldn't serve presence grpc server")
+		log.Fatal("couldn't server presence grpc server")
 	}
+
 }

@@ -5,7 +5,7 @@ import (
 	"game-app/param"
 )
 
-func MapGetPresenceResponseToProtoBuf(g param.GetPresenceResponse) *presence.GetPresenceResponse {
+func MapGetPresenceResponseToProtobuf(g param.GetPresenceResponse) *presence.GetPresenceResponse {
 	r := &presence.GetPresenceResponse{}
 
 	for _, item := range g.Items {
@@ -18,7 +18,7 @@ func MapGetPresenceResponseToProtoBuf(g param.GetPresenceResponse) *presence.Get
 	return r
 }
 
-func MapGetPresenceResponseFromProtoBuf(g *presence.GetPresenceResponse) param.GetPresenceResponse {
+func MapGetPresenceResponseFromProtobuf(g *presence.GetPresenceResponse) param.GetPresenceResponse {
 	r := param.GetPresenceResponse{}
 
 	for _, item := range g.Items {

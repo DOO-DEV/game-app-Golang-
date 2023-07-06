@@ -46,7 +46,8 @@ func New() Config {
 		log.Fatalf("error unmarshaling config: %s", err)
 	}
 
-	fmt.Printf("%+v\n", instance)
-
+	if instance.Debug {
+		fmt.Printf("%+v\n", instance)
+	}
 	return instance
 }
