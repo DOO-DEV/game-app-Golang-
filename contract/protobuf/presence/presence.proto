@@ -1,6 +1,6 @@
 syntax = "proto3";
 package presence; // this is for protobuf not go pkg
-option go_package="contract/golang/presence"; // this where the go result files create by protoc
+option go_package="contract/goproto/presence"; // this where the go result files create by protoc
 
 message GetPresenceRequest {
   repeated uint64 user_ids = 1;

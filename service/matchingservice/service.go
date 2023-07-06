@@ -3,6 +3,7 @@ package matchingservice
 import (
 	"context"
 	"fmt"
+	"game-app/contract/broker"
 	"game-app/entity"
 	"game-app/param"
 	"game-app/pkg/protobufencoder"
@@ -15,10 +16,6 @@ import (
 
 type Config struct {
 	WaitingTimeout time.Duration `koanf:"waiting_timeout"`
-}
-
-type Publisher interface {
-	Publish(event entity.Event, payload string)
 }
 
 // TODO - add context to ~all repo and use-case methods if needed
@@ -36,10 +33,10 @@ type Service struct {
 	config         Config
 	repo           Repository
 	presenceClient PresenceClient
-	Pub            Publisher
+	Pub            broker.Publisher
 }
 
-func New(repo Repository, config Config, presenceClient PresenceClient, publisher Publisher) Service {
+func New(repo Repository, config Config, presenceClient PresenceClient, publisher broker.Publisher) Service {
 	return Service{
 		config:         config,
 		repo:           repo,

@@ -1,6 +1,6 @@
 syntax = "proto3";
 package presence; // this is for protobuf not go pkg
-option go_package="contract/golang/matching"; // this where the go result files create by protoc
+option go_package="contract/goproto/matching"; // this where the go result files create by protoc
 
 message MatchedUsers {
   string category = 1;

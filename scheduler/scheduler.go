@@ -47,7 +47,6 @@ func (s Scheduler) MatchWaitedUser() {
 	if _, err := s.matchSvc.MatchWaitedUser(ctx, param.MatchedWaitedUsersRequest{}); err != nil {
 		// TODO - log error
 		// TODO - update metrics
-
 		fmt.Println("matchSvc.MatchWaitingUsers error", err)
 	}
 
