@@ -24,6 +24,8 @@ import (
 	"game-app/service/validator/matchingvalidator"
 	"game-app/service/validator/uservalidator"
 	"go.uber.org/zap"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"sync"
@@ -31,6 +33,9 @@ import (
 )
 
 func main() {
+	// curl http://localhost:8099/debug/pprof/gorouitine --output goroutine.tar
+	// go tool pprof -http=:8099 ./goroutine.tar
+	go http.ListenAndServe(":8099", nil)
 
 	cfg := config.New()
 
