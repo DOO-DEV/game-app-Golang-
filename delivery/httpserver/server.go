@@ -6,6 +6,7 @@ import (
 	"game-app/delivery/httpserver/backoffice_user_handler"
 	"game-app/delivery/httpserver/matchinghandler"
 	"game-app/delivery/httpserver/userhandler"
+	"game-app/logger"
 	"game-app/service/authorizationservice"
 	"game-app/service/authservice"
 	"game-app/service/backoffice_user_service"
@@ -16,6 +17,7 @@ import (
 	"game-app/service/validator/uservalidator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.uber.org/zap"
 )
 
 type Server struct {
@@ -46,9 +48,39 @@ func New(config config.Config,
 }
 
 func (s Server) Serve() {
-
+	s.Router.Use(middleware.RequestID())
 	s.Router.Use(middleware.Logger())
 	s.Router.Use(middleware.Recover())
+	s.Router.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:           true,
+		LogStatus:        true,
+		LogError:         true,
+		LogHost:          true,
+		LogMethod:        true,
+		LogContentLength: true,
+		LogLatency:       true,
+		LogResponseSize:  true,
+		LogRequestID:     true,
+		LogProtocol:      true,
+		LogRemoteIP:      true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			logger.Logger.Named("http-server").Info("request",
+				zap.String("host", v.Host),
+				zap.String("content-length", v.ContentLength),
+				zap.String("protocol", v.Protocol),
+				zap.String("methode", v.Method),
+				zap.Duration("latency", v.Latency),
+				zap.Any("error", v.Error),
+				zap.String("remote_ip", v.RemoteIP),
+				zap.Int64("response-size", v.ResponseSize),
+				zap.String("uri", v.URI),
+				zap.Int("status", v.Status),
+				zap.String("request_id", v.RequestID),
+			)
+
+			return nil
+		},
+	}))
 
 	s.Router.GET("/health-check", s.healthCheck)
 

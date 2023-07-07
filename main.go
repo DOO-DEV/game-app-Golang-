@@ -7,6 +7,7 @@ import (
 	"game-app/adapter/redis"
 	"game-app/config"
 	"game-app/delivery/httpserver"
+	"game-app/logger"
 	"game-app/repository/migrator"
 	"game-app/repository/mysql"
 	"game-app/repository/mysql/access_control"
@@ -22,6 +23,7 @@ import (
 	"game-app/service/userservice"
 	"game-app/service/validator/matchingvalidator"
 	"game-app/service/validator/uservalidator"
+	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"sync"
@@ -35,7 +37,7 @@ func main() {
 	// TODO - add command for migrations
 	mgr := migrator.New(cfg.MySql)
 	mgr.Up()
-
+	logger.Logger.Info("migration applied", zap.Any("config", cfg))
 	// TODO - add struct and add these returned items as struct fields
 	authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc,
 		matchingSvc, matchingValidator, presenceSvc := setupServices(cfg)
