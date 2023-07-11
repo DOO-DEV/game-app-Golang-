@@ -48,13 +48,13 @@ func (s Server) Start() {
 
 	// pbPresenceserver
 
-	//presenceSvcServer := Server{}
+	presenceSvcServer := Server{svc: s.svc}
 
 	// grpc server
 	grpcServer := grpc.NewServer()
 	// pbPresenceserver register into grpc server
 
-	presence.RegisterPresenceServiceServer(grpcServer, &s)
+	presence.RegisterPresenceServiceServer(grpcServer, &presenceSvcServer)
 	// server grpcServer by listener
 
 	log.Println("presence grpc server starting on", address)

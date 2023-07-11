@@ -1,4 +1,4 @@
-package main
+package presence_grpc_server
 
 import (
 	"game-app/adapter/redis"
@@ -6,12 +6,10 @@ import (
 	"game-app/delivery/grpcserver/presenceserver"
 	"game-app/repository/redis/redispresence"
 	"game-app/service/presenceservice"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	// TODO - read config path from command line
-	cfg := config.New()
-
+func main(cfg config.Config) {
 	redisAdapter := redis.New(cfg.Redis)
 
 	presenceRepo := redispresence.New(redisAdapter)
@@ -19,4 +17,14 @@ func main() {
 
 	server := presenceserver.New(presenceSvc)
 	server.Start()
+}
+
+func New(cfg config.Config) *cobra.Command {
+	return &cobra.Command{
+		Use:   "presence-grpc-server",
+		Short: "run presence grpc server",
+		Run: func(cmd *cobra.Command, args []string) {
+			main(cfg)
+		},
+	}
 }
