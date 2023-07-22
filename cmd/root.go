@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"game-app/cmd/app"
+	"game-app/cmd/game"
 	"game-app/cmd/migrate"
 	presence_grpc_server "game-app/cmd/presenceserver"
 	"game-app/config"
@@ -25,6 +26,7 @@ func Execute() {
 	root.AddCommand(migrate.New(cfg))
 	root.AddCommand(presence_grpc_server.New(cfg))
 	root.AddCommand(app.New(cfg))
+	root.AddCommand(game.New(cfg))
 
 	if err := root.Execute(); err != nil {
 		logger.Logger.Error("failed to execute root command", zap.Error(err))

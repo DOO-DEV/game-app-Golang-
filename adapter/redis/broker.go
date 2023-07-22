@@ -3,7 +3,8 @@ package redis
 import (
 	"context"
 	"game-app/entity"
-	"github.com/labstack/gommon/log"
+	"game-app/logger"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -12,8 +13,7 @@ func (a Adapter) Publish(event entity.Event, payload string) {
 	defer cancel()
 
 	if err := a.Client().Publish(ctx, string(event), payload).Err(); err != nil {
-		log.Errorf("publish err %v\n", err)
-		// TODO - log error
+		logger.Logger.Error("publish", zap.Error(err))
 		// TODO - update metrics
 	}
 }
