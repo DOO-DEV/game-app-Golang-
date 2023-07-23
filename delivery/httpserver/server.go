@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"game-app/config"
 	"game-app/delivery/httpserver/backoffice_user_handler"
+	"game-app/delivery/httpserver/game_websocket"
 	"game-app/delivery/httpserver/matchinghandler"
 	"game-app/delivery/httpserver/userhandler"
 	"game-app/logger"
@@ -26,6 +27,7 @@ type Server struct {
 	userHandler           userhandler.Handler
 	backofficeUserHandler backoffice_user_handler.Handler
 	matchingHandler       matchinghandler.Handler
+	gameWsHandler         game_websocket.Handler
 }
 
 func New(config config.Config,
@@ -44,6 +46,7 @@ func New(config config.Config,
 		userHandler:           userhandler.New(config.Auth, authSvc, userSvc, userValidator, presenceSvc),
 		backofficeUserHandler: backoffice_user_handler.New(config.Auth, authSvc, backofficeUserSvc, authorizationSvc),
 		matchingHandler:       matchinghandler.New(config.Auth, authSvc, matchingSvc, matchingValidator, presenceSvc),
+		gameWsHandler:         game_websocket.New(config.Auth, authSvc, config.Redis),
 	}
 }
 
@@ -87,6 +90,7 @@ func (s Server) Serve() {
 	s.userHandler.SetRoutes(s.Router)
 	s.backofficeUserHandler.SetRoutes(s.Router)
 	s.matchingHandler.SetRoutes(s.Router)
+	s.gameWsHandler.SetRoutes(s.Router)
 
 	s.Router.Logger.Fatal(s.Router.Start(fmt.Sprintf(":%d", s.config.HTTPServer.Port)))
 

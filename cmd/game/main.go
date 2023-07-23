@@ -35,7 +35,7 @@ func main(cfg config.Config) {
 			logger.Logger.Error("can't create a new game", zap.Error(err))
 		}
 
-		pbGame := protobufencoder.EncodeNewGameGameEvent(res.GameID)
+		pbGame := protobufencoder.EncodeNewGameGameEvent(entity.Game{ID: res.GameID, PlayerIDs: payload.UserIDs})
 		redisAdapter.Publish(entity.GameCreatedGameEvent, pbGame)
 	}
 }

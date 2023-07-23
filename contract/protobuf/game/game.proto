@@ -4,4 +4,5 @@ option go_package="contract/goproto/game";
 
 message GameCreated {
   uint64 id = 1;
+  repeated uint64 player_ids = 2;
 }
