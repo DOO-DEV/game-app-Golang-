@@ -4,7 +4,7 @@ type Question struct {
 	ID              uint
 	Question        string
 	PossibleAnswers []PossibleAnswer
-	CorrectAnswer   string
+	CorrectAnswerID uint
 	Difficulty      QuestionDifficulty
 	CategoryID      uint
 }
@@ -27,9 +27,9 @@ const (
 )
 
 type PossibleAnswer struct {
-	ID      uint
-	Content string
-	Choice  string
+	ID     uint
+	Text   string
+	Choice PossibleAnswerChoice
 }
 
 type QuestionDifficulty uint
