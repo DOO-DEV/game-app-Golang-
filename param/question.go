@@ -25,6 +25,7 @@ type UpdateQuestionResponse struct {
 }
 
 type UpdateQuestionRequest struct {
+	ID              uint     `json:"id"`
 	Question        string   `json:"question"`
 	PossibleAnswers []Answer `json:"possible_answers"`
 	CorrectAnswerID uint     `json:"correct_answer_id"`

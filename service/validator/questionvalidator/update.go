@@ -8,7 +8,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
-func (v Validator) ValidateUpdateQuestionRequest(req param.UpdateQuestionRequest, ID uint) (map[string]string, error) {
+func (v Validator) ValidateUpdateQuestionRequest(req param.UpdateQuestionRequest) (map[string]string, error) {
 	const op = "questionvalidator.ValidateUpdateQuestionRequest"
 
 	if err := validation.ValidateStruct(&req,
