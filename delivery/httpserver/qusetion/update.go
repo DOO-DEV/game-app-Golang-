@@ -15,7 +15,7 @@ func (h Handler) UpdateQuestion(c echo.Context) error {
 		return echo.ErrBadRequest
 	}
 	var req param.UpdateQuestionRequest
-	req.ID = uint(id)
+	req.Data.ID = uint(id)
 
 	if err := c.Bind(&req); err != nil {
 		return echo.ErrBadRequest

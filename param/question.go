@@ -5,32 +5,29 @@ type Answer struct {
 	Choice uint   `json:"choice"`
 }
 
-type CreateNewQuestionRequest struct {
-	Question        string   `json:"question"`
-	PossibleAnswers []Answer `json:"possible_answers"`
-	CorrectAnswerID uint     `json:"correct_answer_id"`
-	Difficulty      uint     `json:"difficulty"`
-	CategoryID      uint     `json:"category_id"`
-}
-
-type CreateNewQuestionResponse struct {
-	Question        string   `json:"question"`
-	PossibleAnswers []Answer `json:"possible_answers"`
-	CorrectAnswerID uint     `json:"correct_answer_id"`
-	Difficulty      uint     `json:"difficulty"`
-	CategoryID      uint     `json:"category_id"`
-}
-
-type UpdateQuestionResponse struct {
-}
-
-type UpdateQuestionRequest struct {
+type Question struct {
 	ID              uint     `json:"id"`
 	Question        string   `json:"question"`
 	PossibleAnswers []Answer `json:"possible_answers"`
 	CorrectAnswerID uint     `json:"correct_answer_id"`
 	Difficulty      uint     `json:"difficulty"`
 	CategoryID      uint     `json:"category_id"`
+}
+
+type CreateNewQuestionRequest struct {
+	Data Question `json:"data"`
+}
+
+type CreateNewQuestionResponse struct {
+	Data Question `json:"data"`
+}
+
+type UpdateQuestionResponse struct {
+	Data Question `json:"data"`
+}
+
+type UpdateQuestionRequest struct {
+	Data Question `json:"data"`
 }
 
 type DeleteQuestionRequest struct {
@@ -42,6 +39,7 @@ type DeleteQuestionResponse struct {
 }
 
 type GetQuestionResponse struct {
+	Data Question `json:"data"`
 }
 
 type GetQuestionRequest struct {
@@ -53,4 +51,5 @@ type GetQuestionsByCategoryRequest struct {
 }
 
 type GetQuestionsByCategoryResponse struct {
+	Data []Question `json:"data"`
 }

@@ -1,6 +1,8 @@
 package questionvalidator
 
 import (
+	"fmt"
+	"game-app/entity"
 	"game-app/param"
 	"game-app/pkg/errmsg"
 	"game-app/pkg/richerror"
@@ -12,11 +14,11 @@ func (v Validator) ValidateCreateNewQuestionRequest(req param.CreateNewQuestionR
 	const op = "questionvalidator.ValidateCreateNewQuestionRequest"
 
 	if err := validation.ValidateStruct(&req,
-		validation.Field(&req.Question, validation.Required, is.Alpha),
-		validation.Field(&req.CategoryID, validation.Required, is.Int),
-		validation.Field(&req.CorrectAnswerID, validation.Required, is.Int),
-		validation.Field(&req.Difficulty, validation.Required, is.Int, validation.Min(1), validation.Max(3)),
-		validation.Field(&req.PossibleAnswers, validation.Required),
+		validation.Field(&req.Data.Question, validation.Required, is.Alpha),
+		validation.Field(&req.Data.CategoryID, validation.Required, is.Int),
+		validation.Field(&req.Data.CorrectAnswerID, validation.Required, is.Int),
+		validation.Field(&req.Data.Difficulty, validation.Required, is.Int, validation.By(v.checkDifficulty)),
+		validation.Field(&req.Data.PossibleAnswers, validation.Required, validation.By(v.checkPossibleAnswers)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
 
@@ -34,4 +36,24 @@ func (v Validator) ValidateCreateNewQuestionRequest(req param.CreateNewQuestionR
 	}
 
 	return nil, nil
+}
+
+func (v Validator) checkPossibleAnswers(value interface{}) error {
+	ans := value.(entity.PossibleAnswerChoice)
+
+	if !ans.IsValid() {
+		return fmt.Errorf(errmsg.ErrorMsgInvalidInput)
+	}
+
+	return nil
+}
+
+func (v Validator) checkDifficulty(value interface{}) error {
+	ans := value.(entity.QuestionDifficulty)
+
+	if !ans.IsValid() {
+		return fmt.Errorf(errmsg.ErrorMsgInvalidInput)
+	}
+
+	return nil
 }
