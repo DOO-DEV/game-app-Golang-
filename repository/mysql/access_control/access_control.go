@@ -32,7 +32,8 @@ func (d *DB) GetUserPermissionsTitle(userID uint, role entity.Role) ([]entity.Pe
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, richerror.New(op).WithErr(err).WithMessage(errmsg.ErrorMsgSomethingWentWrong).WithKind(richerror.KindUnexpected)
+		return nil, richerror.New(op).WithErr(err).
+			WithMessage(errmsg.ErrorMsgSomethingWentWrong).WithKind(richerror.KindUnexpected)
 	}
 
 	userRows, err := d.conn.Conn().Query(`select * from access_control where actor_type = ? and actor_id = ?`, entity.UserActorType, userID)
