@@ -1,4 +1,4 @@
-package qusetion
+package question
 
 import (
 	"game-app/service/authorizationservice"
@@ -15,4 +15,22 @@ type Handler struct {
 	authorizationSvc  authorizationservice.Service
 	questionValidator questionvalidator.Validator
 	questionSvc       questionservice.Service
+}
+
+func New(
+	authConfig authservice.Config,
+	authSvc authservice.Service,
+	backofficeUserSvc backoffice_user_service.Service,
+	authorizationSvc authorizationservice.Service,
+	questionValidator questionvalidator.Validator,
+	questionSvc questionservice.Service,
+) Handler {
+	return Handler{
+		authConfig:        authConfig,
+		authSvc:           authSvc,
+		backofficeUserSvc: backofficeUserSvc,
+		authorizationSvc:  authorizationSvc,
+		questionValidator: questionValidator,
+		questionSvc:       questionSvc,
+	}
 }

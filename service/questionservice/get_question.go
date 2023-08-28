@@ -26,7 +26,7 @@ func (s Service) GetQuestion(req param.GetQuestionRequest) (param.GetQuestionRes
 }
 
 func (s Service) mapFromPossibleAnswersEntity(q []entity.PossibleAnswer) []param.Answer {
-	var possibleAnswers []param.Answer
+	possibleAnswers := make([]param.Answer, len(q))
 	for idx, p := range q {
 		possibleAnswers[idx].Text = p.Text
 		possibleAnswers[idx].Choice = uint(p.Choice)
@@ -36,7 +36,7 @@ func (s Service) mapFromPossibleAnswersEntity(q []entity.PossibleAnswer) []param
 }
 
 func (s Service) mapToPossibleAnswerEntity(q []param.Answer) []entity.PossibleAnswer {
-	var possibleAnswers []entity.PossibleAnswer
+	possibleAnswers := make([]entity.PossibleAnswer, len(q))
 	for idx, p := range q {
 		possibleAnswers[idx].Text = p.Text
 		possibleAnswers[idx].Choice = entity.PossibleAnswerChoice(p.Choice)

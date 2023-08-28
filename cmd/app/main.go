@@ -9,6 +9,7 @@ import (
 	"game-app/delivery/httpserver"
 	"game-app/repository/mysql"
 	"game-app/repository/mysql/access_control"
+	mysqlquestion "game-app/repository/mysql/question"
 	mysqluser "game-app/repository/mysql/user"
 	"game-app/repository/redis/matchign"
 	"game-app/repository/redis/redispresence"
@@ -18,8 +19,10 @@ import (
 	"game-app/service/backoffice_user_service"
 	"game-app/service/matchingservice"
 	"game-app/service/presenceservice"
+	"game-app/service/questionservice"
 	"game-app/service/userservice"
 	"game-app/service/validator/matchingvalidator"
+	"game-app/service/validator/questionvalidator"
 	"game-app/service/validator/uservalidator"
 	"github.com/spf13/cobra"
 	"net/http"
@@ -30,25 +33,39 @@ import (
 	"time"
 )
 
+type setupSvc struct {
+	authSvc           authservice.Service
+	userSvc           userservice.Service
+	userValidator     uservalidator.Validator
+	backofficeUserSvc backoffice_user_service.Service
+	authorizationSvc  authorizationservice.Service
+	matchingSvc       matchingservice.Service
+	matchingValidator matchingvalidator.Validator
+	presenceSvc       presenceservice.Service
+	questionSvc       questionservice.Service
+	questionValidator questionvalidator.Validator
+}
+
 func main(cfg config.Config) {
 	// curl http://localhost:8099/debug/pprof/gorouitine --output goroutine.tar
 	// go tool pprof -http=:8099 ./goroutine.tar
 	go http.ListenAndServe(":8099", nil)
 
 	// TODO - add struct and add these returned items as struct fields
-	authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc,
-		matchingSvc, matchingValidator, presenceSvc := setupServices(cfg)
+	services := setupServices(cfg)
 
 	done := make(chan bool)
 	var wg sync.WaitGroup
 	go func() {
 		wg.Add(1)
-		sch := scheduler.New(matchingSvc, cfg.Scheduler)
+		sch := scheduler.New(services.matchingSvc, cfg.Scheduler)
 		sch.Start(done, &wg)
 	}()
 
-	server := httpserver.New(cfg, authSvc, userSvc, userValidator, backofficeSvc, authorizationSvc,
-		matchingSvc, matchingValidator, presenceSvc)
+	server := httpserver.New(cfg, services.authSvc, services.userSvc, services.userValidator,
+		services.backofficeUserSvc, services.authorizationSvc,
+		services.matchingSvc, services.matchingValidator,
+		services.presenceSvc, services.questionValidator, services.questionSvc)
 	go func() {
 		server.Serve()
 	}()
@@ -74,16 +91,7 @@ func main(cfg config.Config) {
 	wg.Wait()
 }
 
-func setupServices(cfg config.Config) (
-	authservice.Service,
-	userservice.Service,
-	uservalidator.Validator,
-	backoffice_user_service.Service,
-	authorizationservice.Service,
-	matchingservice.Service,
-	matchingvalidator.Validator,
-	presenceservice.Service,
-) {
+func setupServices(cfg config.Config) setupSvc {
 	authSvc := authservice.New(cfg.Auth)
 	MysqlRepo := mysql.New(cfg.MySql)
 
@@ -106,7 +114,22 @@ func setupServices(cfg config.Config) (
 
 	matchingValidator := matchingvalidator.New()
 
-	return authSvc, userSvc, userValidator, backofficeUserSvc, authorizationSvc, matchingSvc, matchingValidator, presenceSvc
+	questionRepo := mysqlquestion.New(MysqlRepo)
+	questionValidator := questionvalidator.New(questionRepo)
+	questionSvc := questionservice.New(questionRepo)
+
+	return setupSvc{
+		authSvc:           authSvc,
+		userSvc:           userSvc,
+		userValidator:     userValidator,
+		backofficeUserSvc: backofficeUserSvc,
+		authorizationSvc:  authorizationSvc,
+		matchingSvc:       matchingSvc,
+		matchingValidator: matchingValidator,
+		presenceSvc:       presenceSvc,
+		questionSvc:       questionSvc,
+		questionValidator: questionValidator,
+	}
 }
 
 func New(cfg config.Config) *cobra.Command {

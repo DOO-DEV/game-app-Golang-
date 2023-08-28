@@ -1,4 +1,4 @@
-package qusetion
+package question
 
 import (
 	"game-app/param"

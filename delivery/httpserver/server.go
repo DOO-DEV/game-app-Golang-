@@ -6,6 +6,7 @@ import (
 	"game-app/delivery/httpserver/backoffice_user_handler"
 	"game-app/delivery/httpserver/game_websocket"
 	"game-app/delivery/httpserver/matchinghandler"
+	question "game-app/delivery/httpserver/qusetion"
 	"game-app/delivery/httpserver/userhandler"
 	"game-app/logger"
 	"game-app/service/authorizationservice"
@@ -13,8 +14,10 @@ import (
 	"game-app/service/backoffice_user_service"
 	"game-app/service/matchingservice"
 	"game-app/service/presenceservice"
+	"game-app/service/questionservice"
 	"game-app/service/userservice"
 	"game-app/service/validator/matchingvalidator"
+	"game-app/service/validator/questionvalidator"
 	"game-app/service/validator/uservalidator"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -28,6 +31,7 @@ type Server struct {
 	backofficeUserHandler backoffice_user_handler.Handler
 	matchingHandler       matchinghandler.Handler
 	gameWsHandler         game_websocket.Handler
+	questionHandler       question.Handler
 }
 
 func New(config config.Config,
@@ -39,6 +43,8 @@ func New(config config.Config,
 	matchingSvc matchingservice.Service,
 	matchingValidator matchingvalidator.Validator,
 	presenceSvc presenceservice.Service,
+	questionValidator questionvalidator.Validator,
+	questionSvc questionservice.Service,
 ) Server {
 	return Server{
 		Router:                echo.New(),
@@ -47,6 +53,7 @@ func New(config config.Config,
 		backofficeUserHandler: backoffice_user_handler.New(config.Auth, authSvc, backofficeUserSvc, authorizationSvc),
 		matchingHandler:       matchinghandler.New(config.Auth, authSvc, matchingSvc, matchingValidator, presenceSvc),
 		gameWsHandler:         game_websocket.New(config.Auth, authSvc, config.Redis),
+		questionHandler:       question.New(config.Auth, authSvc, backofficeUserSvc, authorizationSvc, questionValidator, questionSvc),
 	}
 }
 
@@ -91,7 +98,7 @@ func (s Server) Serve() {
 	s.backofficeUserHandler.SetRoutes(s.Router)
 	s.matchingHandler.SetRoutes(s.Router)
 	s.gameWsHandler.SetRoutes(s.Router)
+	s.questionHandler.SetRoutes(s.Router)
 
 	s.Router.Logger.Fatal(s.Router.Start(fmt.Sprintf(":%d", s.config.HTTPServer.Port)))
-
 }

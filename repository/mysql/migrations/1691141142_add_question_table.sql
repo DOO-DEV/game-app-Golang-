@@ -6,7 +6,6 @@ CREATE TABLE questions (
                          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                          `answer_id` INT NOT NULL,
                          `category_id` INT NOT NULL,
-                         FOREIGN KEY (answer_id) REFERENCES answers(id),
                          FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 

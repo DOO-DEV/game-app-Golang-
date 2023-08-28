@@ -1,4 +1,4 @@
-package qusetion
+package question
 
 import (
 	"game-app/param"
@@ -10,7 +10,7 @@ import (
 func (h Handler) CreateNewQuestion(c echo.Context) error {
 	var req param.CreateNewQuestionRequest
 
-	if err := c.Bind(&req); err != nil {
+	if err := c.Bind(&req.Data); err != nil {
 		return echo.ErrBadRequest
 	}
 	if fieldErrors, err := h.questionValidator.ValidateCreateNewQuestionRequest(req); err != nil {

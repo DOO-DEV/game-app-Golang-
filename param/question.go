@@ -6,7 +6,7 @@ type Answer struct {
 }
 
 type Question struct {
-	ID              uint     `json:"id"`
+	ID              uint     `json:"-"`
 	Question        string   `json:"question"`
 	PossibleAnswers []Answer `json:"possible_answers"`
 	CorrectAnswerID uint     `json:"correct_answer_id"`

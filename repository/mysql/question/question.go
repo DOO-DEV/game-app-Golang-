@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+type category struct {
+	id   uint
+	name string
+}
+
 func (d DB) GetQuestionByID(id uint) (entity.Question, error) {
 	const op = "mysql.GetQuestionByID"
 
@@ -88,12 +93,32 @@ func (d DB) UpdateQuestion(question entity.Question) (entity.Question, error) {
 func (d DB) DeleteQuestion(id uint) error {
 	const op = "mysql.DeleteQuestion"
 
-	res, err := d.conn.Conn().Exec(`delete from questions where id = ?`, id)
+	_, err := d.conn.Conn().Exec(`delete from questions where id = ?`, id)
 	if err != nil {
 		return richerror.New(op).WithErr(err).WithKind(richerror.KindUnexpected).
 			WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
+
 	return nil
+}
+
+func (d DB) GetCategoryByID(id uint) (entity.Category, error) {
+	const op = "mysql.GetQuestionByID"
+
+	row := d.conn.Conn().QueryRow(`select * from categories where id = ?`, id)
+	var c category
+	err := row.Scan(&c.id, &c.name)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return entity.Category(c.name), richerror.New(op).WithErr(err).WithMessage(errmsg.ErrorMsgNotFound).
+				WithKind(richerror.KindNotFound)
+		}
+
+		return entity.Category(c.name), richerror.New(op).WithErr(err).WithMessage(errmsg.ErrorMsgCantQueryResult).
+			WithKind(richerror.KindUnexpected)
+	}
+
+	return entity.Category(c.name), nil
 }
 
 func scanQuestion(scanner mysql.Scanner) (entity.Question, error) {
