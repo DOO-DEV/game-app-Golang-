@@ -27,9 +27,10 @@ const (
 )
 
 type PossibleAnswer struct {
-	ID     uint
-	Text   string
-	Choice PossibleAnswerChoice
+	ID         uint
+	QuestionID uint
+	Text       string
+	Choice     PossibleAnswerChoice
 }
 
 type QuestionDifficulty uint

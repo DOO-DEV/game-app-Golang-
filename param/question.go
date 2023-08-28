@@ -15,7 +15,9 @@ type Question struct {
 }
 
 type CreateNewQuestionRequest struct {
-	Data Question `json:"data"`
+	ID         uint     `json:"id"`
+	QuestionID uint     `json:"question_id"`
+	Data       Question `json:"data"`
 }
 
 type CreateNewQuestionResponse struct {
