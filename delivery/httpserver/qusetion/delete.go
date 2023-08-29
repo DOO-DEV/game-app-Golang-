@@ -17,9 +17,6 @@ func (h Handler) DeleteQuestion(c echo.Context) error {
 	var req param.DeleteQuestionRequest
 	req.ID = uint(id)
 
-	if err := c.Bind(&req); err != nil {
-		return echo.ErrBadRequest
-	}
 	if fieldErrors, err := h.questionValidator.ValidateDeleteQuestionRequest(req); err != nil {
 		msg, code := httpmsg.Error(err)
 		return c.JSON(code, echo.Map{

@@ -6,14 +6,13 @@ import (
 	"game-app/pkg/errmsg"
 	"game-app/pkg/richerror"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 func (v Validator) ValidateGetQuestionsByCategoryRequest(req param.GetQuestionsByCategoryRequest) (map[string]string, error) {
 	const op = "questionvalidator.ValidateGetQuestionsByCategoryRequest"
 
 	if err := validation.ValidateStruct(&req,
-		validation.Field(&req.CategoryID, validation.Required, is.Int, validation.By(v.doesCategoryExist)),
+		validation.Field(&req.CategoryID, validation.Required, validation.By(v.doesCategoryExist)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
 

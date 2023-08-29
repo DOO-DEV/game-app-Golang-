@@ -17,9 +17,6 @@ func (h Handler) GetQuestion(c echo.Context) error {
 	var req param.GetQuestionRequest
 	req.ID = uint(id)
 
-	if err := c.Bind(&req); err != nil {
-		return echo.ErrBadRequest
-	}
 	if fieldErrors, err := h.questionValidator.ValidateGetQuestionRequest(req); err != nil {
 		msg, code := httpmsg.Error(err)
 		return c.JSON(code, echo.Map{
@@ -30,7 +27,10 @@ func (h Handler) GetQuestion(c echo.Context) error {
 
 	res, err := h.questionSvc.GetQuestion(req)
 	if err != nil {
-		return echo.ErrBadRequest
+		msg, code := httpmsg.Error(err)
+		return c.JSON(code, echo.Map{
+			"message": msg,
+		})
 	}
 
 	return c.JSON(http.StatusOK, res)

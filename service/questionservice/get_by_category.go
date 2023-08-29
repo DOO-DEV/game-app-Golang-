@@ -14,6 +14,7 @@ func (s Service) GetQuestionsByCategory(req param.GetQuestionsByCategoryRequest)
 	}
 
 	var res param.GetQuestionsByCategoryResponse
+	res.Data = make([]param.Question, len(questions))
 	for idx, q := range questions {
 		res.Data[idx].Question = q.Question
 		res.Data[idx].ID = q.ID

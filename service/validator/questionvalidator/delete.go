@@ -6,17 +6,15 @@ import (
 	"game-app/pkg/errmsg"
 	"game-app/pkg/richerror"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 func (v Validator) ValidateDeleteQuestionRequest(req param.DeleteQuestionRequest) (map[string]string, error) {
 	const op = "questionvalidator.ValidateDeleteQuestionRequest"
 
 	if err := validation.ValidateStruct(&req,
-		validation.Field(&req.ID, is.Int, validation.By(v.doesQuestionExist)),
+		validation.Field(&req.ID, validation.By(v.doesQuestionExist)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
-
 		errV, ok := err.(validation.Errors)
 		if ok {
 			for key, value := range errV {

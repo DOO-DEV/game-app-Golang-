@@ -61,6 +61,6 @@ func (d DB) DeleteAnswer(id uint) error {
 		return richerror.New(op).WithErr(err).WithKind(richerror.KindUnexpected).
 			WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
-	
+
 	return nil
 }
