@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	answeradaptor "game-app/adapter/answer"
 	presenceClient "game-app/adapter/presence"
 	"game-app/adapter/redis"
 	"game-app/config"
@@ -116,7 +117,8 @@ func setupServices(cfg config.Config) setupSvc {
 
 	questionRepo := mysqlquestion.New(MysqlRepo)
 	questionValidator := questionvalidator.New(questionRepo)
-	questionSvc := questionservice.New(questionRepo)
+	answerAdaptor := answeradaptor.New(":8087")
+	questionSvc := questionservice.New(questionRepo, answerAdaptor)
 
 	return setupSvc{
 		authSvc:           authSvc,

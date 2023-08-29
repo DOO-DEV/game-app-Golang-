@@ -6,7 +6,6 @@ type InsertAnswersRequest struct {
 }
 
 type InsertAnswersResponse struct {
-	Message string `json:"message"`
 }
 
 type UpdateAnswerRequest struct {
@@ -26,4 +25,13 @@ type DeleteAnswerRequest struct {
 
 type DeleteAnswerResponse struct {
 	Message string `json:"message"`
+}
+
+type GetAnswersRequest struct {
+	QuestionID uint
+}
+
+type GetAnswersResponse struct {
+	QuestionID uint
+	Data       []Answer
 }

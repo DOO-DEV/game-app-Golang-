@@ -61,5 +61,4 @@ func (s Server) Start() {
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatal("couldn't server presence grpc server")
 	}
-
 }

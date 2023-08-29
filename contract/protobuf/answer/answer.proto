@@ -1,0 +1,51 @@
+syntax = "proto3";
+package answer;
+
+option go_package = "contract/goproto/answer";
+
+message InsertAnswersRequest {
+  uint64 question_id = 1;
+  repeated Answer items = 2;
+
+}
+
+message InsertAnswersResponse {
+
+}
+
+message Answer {
+  uint64 id = 1;
+  uint64 question_id = 2;
+  string text = 3;
+  uint64 choice = 4;
+}
+
+
+message GetAnswersRequest {
+  uint64 question_id = 1;
+}
+
+message GetAnswersResponse {
+  repeated Answer items = 1;
+}
+
+message DeleteAnswerRequest {
+  uint64 id = 1;
+}
+
+message DeleteAnswerResponse {}
+
+message UpdateAnswerRequest {
+ Answer answer = 1;
+}
+
+message UpdateAnswerResponse {
+  Answer answer = 1;
+}
+
+service AnswerService {
+  rpc GetAnswers(GetAnswersRequest) returns (GetAnswersResponse);
+  rpc InsertAnswers(InsertAnswersRequest) returns (InsertAnswersResponse);
+  rpc DeleteAnswer(DeleteAnswerRequest) returns (DeleteAnswerResponse);
+  rpc UpdateAnswer(UpdateAnswerRequest) returns (UpdateAnswerResponse);
+}

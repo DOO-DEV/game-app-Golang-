@@ -57,7 +57,7 @@ func (s Service) AddToWaitingList(req param.AddToWaitingListRequest) (param.AddT
 	return param.AddToWaitingListResponse{Timeout: s.config.WaitingTimeout}, nil
 }
 
-func (s Service) MatchWaitedUser(ctx context.Context, req param.MatchedWaitedUsersRequest) (param.MatchWaitedUsersResponse, error) {
+func (s Service) MatchWaitedUser(ctx context.Context, _ param.MatchedWaitedUsersRequest) (param.MatchWaitedUsersResponse, error) {
 	const op = "matchingservice.MatchWaitedUser"
 
 	var wg sync.WaitGroup

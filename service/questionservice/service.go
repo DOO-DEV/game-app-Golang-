@@ -1,7 +1,9 @@
 package questionservice
 
 import (
+	"context"
 	"game-app/entity"
+	"game-app/param"
 )
 
 type Repository interface {
@@ -12,12 +14,21 @@ type Repository interface {
 	GetQuestionsByCategory(id uint) ([]entity.Question, error)
 }
 
-type Service struct {
-	repo Repository
+type AnswerClient interface {
+	GetAnswers(ctx context.Context, req param.GetAnswersRequest) (param.GetAnswersResponse, error)
+	InsertAnswers(ctx context.Context, req param.InsertAnswersRequest) (param.InsertAnswersResponse, error)
+	DeleteAnswer(ctx context.Context, req param.DeleteAnswerRequest) (param.DeleteAnswerResponse, error)
+	UpdateAnswer(ctx context.Context, req param.UpdateAnswerRequest) (param.UpdateAnswerResponse, error)
 }
 
-func New(repo Repository) Service {
+type Service struct {
+	repo         Repository
+	answerClient AnswerClient
+}
+
+func New(repo Repository, answerClient AnswerClient) Service {
 	return Service{
-		repo: repo,
+		repo:         repo,
+		answerClient: answerClient,
 	}
 }
