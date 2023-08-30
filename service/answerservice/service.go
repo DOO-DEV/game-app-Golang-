@@ -57,6 +57,7 @@ func (s Service) InsertAnswers(ctx context.Context, req param.InsertAnswersReque
 		answers = append(answers, answer)
 	}
 
+	fmt.Printf("service: %+v", answers)
 	if err := s.repo.InsertAnswers(ctx, answers); err != nil {
 		return param.InsertAnswersResponse{}, richerror.New(op).WithErr(err)
 	}
@@ -74,6 +75,7 @@ func (s Service) UpdateAnswer(ctx context.Context, req param.UpdateAnswerRequest
 		Choice:     entity.PossibleAnswerChoice(req.Data.Choice),
 	}
 
+	fmt.Println(newAnswer)
 	answer, err := s.repo.UpdateAnswer(ctx, newAnswer)
 	if err != nil {
 		return param.UpdateAnswerResponse{}, richerror.New(op).WithErr(err)

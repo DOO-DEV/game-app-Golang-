@@ -17,7 +17,7 @@ func (h Handler) UpdateQuestion(c echo.Context) error {
 	var req param.UpdateQuestionRequest
 	req.Data.ID = uint(id)
 
-	if err := c.Bind(&req); err != nil {
+	if err := c.Bind(&req.Data); err != nil {
 		return echo.ErrBadRequest
 	}
 	if fieldErrors, err := h.questionValidator.ValidateUpdateQuestionRequest(req); err != nil {
@@ -28,7 +28,7 @@ func (h Handler) UpdateQuestion(c echo.Context) error {
 		})
 	}
 
-	res, err := h.questionSvc.UpdateQuestion(req)
+	res, err := h.questionSvc.UpdateQuestion(c.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

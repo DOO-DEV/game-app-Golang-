@@ -1,12 +1,13 @@
 package questionservice
 
 import (
+	"context"
 	"game-app/entity"
 	"game-app/param"
 	"game-app/pkg/richerror"
 )
 
-func (s Service) CreateNewQuestion(req param.CreateNewQuestionRequest) (param.CreateNewQuestionResponse, error) {
+func (s Service) CreateNewQuestion(ctx context.Context, req param.CreateNewQuestionRequest) (param.CreateNewQuestionResponse, error) {
 	const op = "questionservice.CeateNewQuestion"
 
 	newQuestion := entity.Question{
@@ -20,6 +21,12 @@ func (s Service) CreateNewQuestion(req param.CreateNewQuestionRequest) (param.Cr
 	if err != nil {
 		return param.CreateNewQuestionResponse{}, richerror.New(op).WithErr(err)
 	}
+	if _, err := s.answerClient.InsertAnswers(ctx, param.InsertAnswersRequest{
+		QuestionID: q.ID,
+		Data:       req.Data.PossibleAnswers,
+	}); err != nil {
+		return param.CreateNewQuestionResponse{}, richerror.New(op).WithErr(err)
+	}
 
 	res := param.CreateNewQuestionResponse{Data: param.Question{
 		ID:              q.ID,
@@ -29,6 +36,6 @@ func (s Service) CreateNewQuestion(req param.CreateNewQuestionRequest) (param.Cr
 		Difficulty:      uint(q.Difficulty),
 		CategoryID:      q.CategoryID,
 	}}
-	
+
 	return res, nil
 }

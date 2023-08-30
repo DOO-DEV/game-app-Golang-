@@ -21,7 +21,7 @@ func (h Handler) CreateNewQuestion(c echo.Context) error {
 		})
 	}
 
-	res, err := h.questionSvc.CreateNewQuestion(req)
+	res, err := h.questionSvc.CreateNewQuestion(c.Request().Context(), req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

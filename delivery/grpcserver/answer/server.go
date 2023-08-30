@@ -45,6 +45,7 @@ func (s Server) InsertAnswers(ctx context.Context, req *answer.InsertAnswersRequ
 		QuestionID: uint(req.QuestionId),
 		Data:       answers,
 	})
+	fmt.Println(res, err)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +64,6 @@ func (s Server) DeleteAnswer(ctx context.Context, req *answer.DeleteAnswerReques
 }
 
 func (s Server) UpdateAnswer(ctx context.Context, req *answer.UpdateAnswerRequest) (*answer.UpdateAnswerResponse, error) {
-
 	res, err := s.svc.UpdateAnswer(ctx, param.UpdateAnswerRequest{
 		ID:         uint(req.Answer.Id),
 		QuestionID: uint(req.Answer.QuestionId),
@@ -80,7 +80,7 @@ func (s Server) UpdateAnswer(ctx context.Context, req *answer.UpdateAnswerReques
 }
 
 func (s Server) Start() {
-	addr := fmt.Sprintf("%d", 8087)
+	addr := fmt.Sprintf(":%d", 8087)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		panic(err)
@@ -89,7 +89,7 @@ func (s Server) Start() {
 	grpcServer := grpc.NewServer()
 	answer.RegisterAnswerServiceServer(grpcServer, &s)
 
-	log.Println("presence grpc server starting on", addr)
+	log.Println("answer grpc server starting on", addr)
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatal("couldn't server answer grpc server")
 	}

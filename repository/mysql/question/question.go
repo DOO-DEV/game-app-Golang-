@@ -2,6 +2,7 @@ package mysqlquestion
 
 import (
 	"database/sql"
+	"fmt"
 	"game-app/entity"
 	"game-app/pkg/errmsg"
 	"game-app/pkg/richerror"
@@ -67,6 +68,7 @@ func (d DB) InsertQuestion(question entity.Question) (entity.Question, error) {
 	res, err := d.conn.Conn().Exec(`insert into questions(question, difficulty, answer_id, category_id) values(?, ?, ?, ?)`,
 		question.Question, question.Difficulty, question.CorrectAnswerID, question.CategoryID)
 	if err != nil {
+		fmt.Println("errrr", err)
 		return entity.Question{}, richerror.New(op).WithErr(err).WithKind(richerror.KindUnexpected).
 			WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
@@ -75,17 +77,19 @@ func (d DB) InsertQuestion(question entity.Question) (entity.Question, error) {
 
 	return question, nil
 }
-func (d DB) UpdateQuestion(question entity.Question) (entity.Question, error) {
+func (d DB) UpdateQuestion(q entity.Question) (entity.Question, error) {
 	const op = "mysql.UpdateQuestion"
 
-	res, err := d.conn.Conn().Exec(`insert into questions(question, difficulty, answer_id, category_id) values(?, ?, ?, ?)`,
-		question.Question, question.Difficulty, question.CorrectAnswerID, question.CategoryID)
+	fmt.Println(q)
+	_, err := d.conn.Conn().Exec(`update questions set question = ?, difficulty = ?, answer_id = ?, category_id = ? where id = ?`,
+		q.Question, q.Difficulty, q.CorrectAnswerID, q.CategoryID, q.ID)
 	if err != nil {
+		fmt.Println(err)
 		return entity.Question{}, richerror.New(op).WithErr(err).WithKind(richerror.KindUnexpected).
 			WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}
-	id, _ := res.LastInsertId()
-	question.ID = uint(id)
+	row := d.conn.Conn().QueryRow(`select * from questions where id = ?`, q.ID)
+	question, err := scanQuestion(row)
 
 	return question, nil
 }
@@ -95,6 +99,7 @@ func (d DB) DeleteQuestion(id uint) error {
 
 	_, err := d.conn.Conn().Exec(`delete from questions where id = ?`, id)
 	if err != nil {
+		fmt.Println(err)
 		return richerror.New(op).WithErr(err).WithKind(richerror.KindUnexpected).
 			WithMessage(errmsg.ErrorMsgSomethingWentWrong)
 	}

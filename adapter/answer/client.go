@@ -16,21 +16,14 @@ func New(addr string) Client {
 	return Client{address: addr}
 }
 
-func (c Client) connectToGrpcServer() (answer.AnswerServiceClient, error) {
+func (c Client) GetAnswers(ctx context.Context, req param.GetAnswersRequest) (param.GetAnswersResponse, error) {
 	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
-		return nil, err
+		return param.GetAnswersResponse{}, err
 	}
 	defer conn.Close()
 
 	client := answer.NewAnswerServiceClient(conn)
-
-	return client, nil
-
-}
-
-func (c Client) GetAnswers(ctx context.Context, req param.GetAnswersRequest) (param.GetAnswersResponse, error) {
-	client, err := c.connectToGrpcServer()
 	if err != nil {
 		return param.GetAnswersResponse{}, err
 	}
@@ -46,10 +39,13 @@ func (c Client) GetAnswers(ctx context.Context, req param.GetAnswersRequest) (pa
 }
 
 func (c Client) InsertAnswers(ctx context.Context, req param.InsertAnswersRequest) (param.InsertAnswersResponse, error) {
-	client, err := c.connectToGrpcServer()
+	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
 		return param.InsertAnswersResponse{}, err
 	}
+	defer conn.Close()
+
+	client := answer.NewAnswerServiceClient(conn)
 
 	ans := make([]*answer.Answer, 0)
 	for _, item := range req.Data {
@@ -71,10 +67,13 @@ func (c Client) InsertAnswers(ctx context.Context, req param.InsertAnswersReques
 }
 
 func (c Client) DeleteAnswer(ctx context.Context, req param.DeleteAnswerRequest) (param.DeleteAnswerResponse, error) {
-	client, err := c.connectToGrpcServer()
+	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
 		return param.DeleteAnswerResponse{}, err
 	}
+	defer conn.Close()
+
+	client := answer.NewAnswerServiceClient(conn)
 
 	resp, err := client.DeleteAnswer(ctx, &answer.DeleteAnswerRequest{Id: uint64(req.ID)})
 	if err != nil {
@@ -85,10 +84,13 @@ func (c Client) DeleteAnswer(ctx context.Context, req param.DeleteAnswerRequest)
 }
 
 func (c Client) UpdateAnswer(ctx context.Context, req param.UpdateAnswerRequest) (param.UpdateAnswerResponse, error) {
-	client, err := c.connectToGrpcServer()
+	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
 		return param.UpdateAnswerResponse{}, err
 	}
+	defer conn.Close()
+
+	client := answer.NewAnswerServiceClient(conn)
 
 	resp, err := client.UpdateAnswer(ctx, &answer.UpdateAnswerRequest{Answer: &answer.Answer{
 		Id:         uint64(req.ID),

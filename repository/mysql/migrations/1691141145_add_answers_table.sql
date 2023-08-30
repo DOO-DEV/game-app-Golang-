@@ -4,7 +4,7 @@ CREATE TABLE answers (
                          `text` VARCHAR(255) NOT NULL ,
                          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                          `question_id` INT NOT NULL,
-                         FOREIGN KEY (question_id) REFERENCES questions(id)
+                         FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
 -- +migrate Down

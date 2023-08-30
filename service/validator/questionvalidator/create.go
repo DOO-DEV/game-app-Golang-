@@ -20,7 +20,6 @@ func (v Validator) ValidateCreateNewQuestionRequest(req param.CreateNewQuestionR
 		validation.Field(&req.Data.PossibleAnswers, validation.Required, validation.By(v.checkPossibleAnswers)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
-
 		errV, ok := err.(validation.Errors)
 		if ok {
 			for key, value := range errV {

@@ -25,7 +25,7 @@ func (h Handler) DeleteQuestion(c echo.Context) error {
 		})
 	}
 
-	res, err := h.questionSvc.DeleteQuestion(req)
+	res, err := h.questionSvc.DeleteQuestion(c.Request().Context(), req)
 	if err != nil {
 		return echo.ErrBadRequest
 	}

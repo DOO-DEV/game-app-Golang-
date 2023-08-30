@@ -5,17 +5,16 @@ import (
 	"game-app/pkg/errmsg"
 	"game-app/pkg/richerror"
 	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 func (v Validator) ValidateUpdateQuestionRequest(req param.UpdateQuestionRequest) (map[string]string, error) {
 	const op = "questionvalidator.ValidateUpdateQuestionRequest"
 
-	if err := validation.ValidateStruct(&req,
-		validation.Field(&req.Data.Question, validation.Required, is.Alpha),
-		validation.Field(&req.Data.CategoryID, validation.Required, is.Int),
-		validation.Field(&req.Data.CorrectAnswerID, validation.Required, is.Int),
-		validation.Field(&req.Data.Difficulty, validation.Required, is.Int, validation.By(v.checkDifficulty)),
+	if err := validation.ValidateStruct(&req.Data,
+		validation.Field(&req.Data.Question, validation.Required),
+		validation.Field(&req.Data.CategoryID, validation.Required),
+		validation.Field(&req.Data.CorrectAnswerID, validation.Required),
+		validation.Field(&req.Data.Difficulty, validation.Required, validation.By(v.checkDifficulty)),
 		validation.Field(&req.Data.PossibleAnswers, validation.Required, validation.By(v.checkPossibleAnswers)),
 	); err != nil {
 		fieldErrors := make(map[string]string)
