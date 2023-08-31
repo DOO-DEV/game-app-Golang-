@@ -14,7 +14,7 @@ type Config struct {
 }
 
 type QuestionRepo interface {
-	GetQuestionsByCategory(id uint) ([]entity.Question, error)
+	GetQuestionsByCategoryName(c entity.Category) ([]entity.Question, error)
 }
 
 type GameRepo interface {
@@ -64,6 +64,6 @@ func (s Service) CreateNewGame(ctx context.Context, _ param.CreateNewGameRequest
 
 func (s Service) createGameByCategory(c entity.Category) entity.Game {
 
-	s.questionRepo.GetQuestionsByCategory(c)
+	s.questionRepo.GetQuestionsByCategoryName(c)
 	return entity.Game{}
 }
