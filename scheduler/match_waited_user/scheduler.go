@@ -1,4 +1,4 @@
-package scheduler
+package match_waited_user
 
 import (
 	"context"

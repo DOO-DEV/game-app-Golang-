@@ -62,6 +62,37 @@ func (d DB) GetQuestionsByCategory(catID uint) ([]entity.Question, error) {
 	return questions, nil
 }
 
+func (d DB) GetQuestionsByCategoryName(category entity.Category) ([]entity.Question, error) {
+	const op = "mysql.GetQuestionsByCategory"
+
+	rows, err := d.conn.Conn().Query(`select q.id, q.question, q.difficulty, q.answer_id, c.name from categories as c inner join questions as q on c.name = ?`, category)
+	if err != nil {
+		return []entity.Question{}, richerror.New(op).WithErr(err).
+			WithMessage(errmsg.ErrorMsgSomethingWentWrong).WithKind(richerror.KindUnexpected)
+	}
+	defer rows.Close()
+
+	questions := make([]entity.Question, 0)
+	for rows.Next() {
+		q := entity.Question{}
+		var c string
+		rows.Scan(&q.ID, &q.Question, &q.Difficulty, &q.CorrectAnswerID, &c)
+		if err != nil {
+			return nil, richerror.New(op).WithErr(err).
+				WithMessage(errmsg.ErrorMsgSomethingWentWrong).WithKind(richerror.KindUnexpected)
+		}
+
+		questions = append(questions, q)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, richerror.New(op).
+			WithErr(err).WithMessage(errmsg.ErrorMsgSomethingWentWrong).WithKind(richerror.KindUnexpected)
+	}
+
+	return questions, nil
+}
+
 func (d DB) InsertQuestion(question entity.Question) (entity.Question, error) {
 	const op = "mysql.InsertQuestion"
 

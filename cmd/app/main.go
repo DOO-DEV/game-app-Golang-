@@ -14,7 +14,7 @@ import (
 	mysqluser "game-app/repository/mysql/user"
 	"game-app/repository/redis/matchign"
 	"game-app/repository/redis/redispresence"
-	"game-app/scheduler"
+	"game-app/scheduler/match_waited_user"
 	"game-app/service/authorizationservice"
 	"game-app/service/authservice"
 	"game-app/service/backoffice_user_service"
@@ -59,7 +59,7 @@ func main(cfg config.Config) {
 	var wg sync.WaitGroup
 	go func() {
 		wg.Add(1)
-		sch := scheduler.New(services.matchingSvc, cfg.Scheduler)
+		sch := match_waited_user.New(services.matchingSvc, cfg.Scheduler)
 		sch.Start(done, &wg)
 	}()
 
